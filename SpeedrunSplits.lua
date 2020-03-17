@@ -40,6 +40,7 @@ function SpeedrunSplitsDefaults()
 	SpeedrunSplitsOptions["Delta"] = false
 	SpeedrunSplitsOptions["Next"] = false
 	SpeedrunSplitsOptions["Colour"] = false
+	SpeedrunSplitsOptions["Timing"] = false
 end
 
 local NAME, S = ...
@@ -140,6 +141,12 @@ panel.ColourCheckButton = CreateFrame("CheckButton", "SpeedrunSplitsColourCheckB
 panel.ColourCheckButton.tooltip = "Disables the colour comparisons in SpeedrunSplits";
 _G["SpeedrunSplitsColourCheckButtonText"]:SetText("Disable colours");
 panel.ColourCheckButton:SetPoint("TOPLEFT", panel.NextCheckButton, "BOTTOMLEFT", 0, 0);
+
+panel.TimingCheckButton = CreateFrame("CheckButton", "SpeedrunSplitsTimingCheckButton", panel, "ChatConfigCheckButtonTemplate");
+panel.TimingCheckButton.tooltip = "Timing only starts once you move for the first time";
+_G["SpeedrunSplitsTimingCheckButtonText"]:SetText("Start timing on first movement");
+panel.TimingCheckButton:SetPoint("TOPLEFT", panel.ColourCheckButton, "BOTTOMLEFT", 0, 0);
+
 
 panel.SaveButton = CreateFrame("Button", "SpeedrunSplitsSaveButton", panel, "UIPanelButtonTemplate");
 panel.SaveButton:SetSize(144,22)
@@ -279,6 +286,15 @@ function f:OnEvent(event, arg1, arg2)
 			end
 			SpeedrunSplitsGenerateAll()
 		end)
+		panel.TimingCheckButton:SetScript("OnClick",function()
+			if panel.TimingCheckButton:GetChecked() then
+				SpeedrunSplitsOptions["Timing"] = true
+			else
+				SpeedrunSplitsOptions["Timing"] = false
+			end
+			SpeedrunSplitsGenerateAll()
+		end)
+
 		panel.SaveButton:SetScript("OnClick",SpeedrunSplitsSave)
 		panel.PrintButton:SetScript("OnClick",SpeedrunSplitsPrint)
 
@@ -308,7 +324,7 @@ function f:OnEvent(event, arg1, arg2)
 			SpeedrunSplitsXPWindow = true
 		end
 
-		if SpeedrunSplits == nil or SpeedrunSplitsLevel == 1 then
+		if SpeedrunSplits == nil or (SpeedrunSplitsLevel == 1 and not SpeedrunSplits[1]) then
 			SpeedrunSplits = {}
 			SpeedrunSplits[1] = 0
 		end
@@ -372,6 +388,12 @@ function f:OnEvent(event, arg1, arg2)
 		end
 
 		SpeedrunSplitsLevelUp = false
+	elseif (event == "PLAYER_STARTED_MOVING") then
+		if SpeedrunSplitsLevel == 1 and SpeedrunSplits[1] == 0 and UnitXP("player") == 0 then
+			SpeedrunSplits[1] = SpeedrunSplitsTotalTime
+			SpeedrunSplitsGenerateAll()
+		end
+		f:UnregisterEvent("PLAYER_STARTED_MOVING")
 	end
 end
 
@@ -384,7 +406,11 @@ function f:OnUpdate(arg1)
 		SpeedrunSplitsGenerateDelta()
 		
 		if SpeedrunSplitsTotalTime > 0 then
-			f.timer:SetText(SpeedrunSplitsTime(SpeedrunSplitsTotalTime).."\n"..SpeedrunSplitsTime(SpeedrunSplitsLevelTime))
+			if SpeedrunSplitsOptions["Timing"] and SpeedrunSplits[1] > 0 then
+				f.timer:SetText(SpeedrunSplitsTime(SpeedrunSplitsTotalTime-SpeedrunSplits[1]).." (+"..SpeedrunSplitsTime(SpeedrunSplits[1])..")".."\n"..SpeedrunSplitsTime(SpeedrunSplitsLevelTime))
+			else
+				f.timer:SetText(SpeedrunSplitsTime(SpeedrunSplitsTotalTime).."\n"..SpeedrunSplitsTime(SpeedrunSplitsLevelTime))
+			end
 		end
 
 		TimeSinceLastUpdate = TimeSinceLastUpdate - SpeedrunSplits_UpdateInterval;
@@ -394,6 +420,7 @@ end
 f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("PLAYER_LEVEL_UP")
 f:RegisterEvent("PLAYER_LOGIN")
+f:RegisterEvent("PLAYER_STARTED_MOVING")
 
 f:SetScript("OnEvent", f.OnEvent)
 
@@ -460,6 +487,14 @@ function SpeedrunSplitsGenerateAll()
 	SpeedrunSplitsGenerateDelta()
 end
 
+function SpeedrunSplitsStartTime(time)
+	if SpeedrunSplitsOptions["Timing"] and time then
+		return time
+	else
+		return 0
+	end
+end
+
 function SpeedrunSplitsGenerate()
 	if SpeedrunSplitsMax > 1 then
 		local SpeedrunSplitsText = ""
@@ -472,7 +507,7 @@ function SpeedrunSplitsGenerate()
 			end
 			SpeedrunSplitsText = SpeedrunSplitsText.."Level "..i
 			if i <= SpeedrunSplitsLevel and SpeedrunSplitsPBCopy[i] and SpeedrunSplits[i] then
-				local SpeedrunSplitsDiff = SpeedrunSplits[i]-SpeedrunSplitsPBCopy[i]
+				local SpeedrunSplitsDiff = (SpeedrunSplits[i]-SpeedrunSplitsStartTime(SpeedrunSplits[1]))-(SpeedrunSplitsPBCopy[i]-SpeedrunSplitsStartTime(SpeedrunSplitsPBCopy[1]))
 				if not SpeedrunSplitsOptions["Colour"] then
 					if SpeedrunSplitsDiff < 0 then
 						SpeedrunSplitsDiffColor = "|cff00aa00"
@@ -485,9 +520,9 @@ function SpeedrunSplitsGenerate()
 						end
 					end
 				end
-				SpeedrunSplitsSplitTime = SpeedrunSplitsSplitTime..SpeedrunSplitsDiffColor..SpeedrunSplitsTime(SpeedrunSplits[i]).."|r"
+				SpeedrunSplitsSplitTime = SpeedrunSplitsSplitTime..SpeedrunSplitsDiffColor..SpeedrunSplitsTime(SpeedrunSplits[i]-SpeedrunSplitsStartTime(SpeedrunSplits[1])).."|r"
 			elseif SpeedrunSplitsPBCopy[i] then
-				SpeedrunSplitsSplitTime = SpeedrunSplitsSplitTime..SpeedrunSplitsTime(SpeedrunSplitsPBCopy[i])
+				SpeedrunSplitsSplitTime = SpeedrunSplitsSplitTime..SpeedrunSplitsTime(SpeedrunSplitsPBCopy[i]-SpeedrunSplitsStartTime(SpeedrunSplitsPBCopy[1]))
 			end
 		end
 
@@ -504,9 +539,9 @@ function SpeedrunSplitsGenerateDelta()
 		local SpeedrunSplitsDeltaTime = 0
 		local SpeedrunSplitsDelta = ""
 		if SpeedrunSplitsLevel < 60 and SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] and not SpeedrunSplitsOptions["Next"] then
-			if SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] - SpeedrunSplitsDeltaDiff < SpeedrunSplitsTotalTime or SpeedrunSplitsXPWindow then
+			if SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] - SpeedrunSplitsStartTime(SpeedrunSplitsPBCopy[1]) - SpeedrunSplitsDeltaDiff < SpeedrunSplitsTotalTime - SpeedrunSplitsStartTime(SpeedrunSplits[1]) or SpeedrunSplitsXPWindow then
 				SpeedrunSplitsDeltaUpdate = true
-				SpeedrunSplitsDeltaTime = SpeedrunSplitsTotalTime - SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1]
+				SpeedrunSplitsDeltaTime = SpeedrunSplitsTotalTime - SpeedrunSplitsStartTime(SpeedrunSplits[1]) - (SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] - SpeedrunSplitsStartTime(SpeedrunSplitsPBCopy[1]))
 				if not SpeedrunSplitsOptions["Colour"] then
 					if SpeedrunSplitsDeltaTime < 0 then
 						SpeedrunSplitsDiffColor = "|cff00aa00"
@@ -521,7 +556,7 @@ function SpeedrunSplitsGenerateDelta()
 		if SpeedrunSplitsDeltaUpdate then
 			for i=SpeedrunSplitsLevel,SpeedrunSplitsMin,-1 do
 				if SpeedrunSplits[i] and SpeedrunSplitsPBCopy[i] then
-					SpeedrunSplitsDeltaTime = SpeedrunSplits[i]-SpeedrunSplitsPBCopy[i]
+					SpeedrunSplitsDeltaTime = SpeedrunSplits[i]-SpeedrunSplitsStartTime(SpeedrunSplits[1])-(SpeedrunSplitsPBCopy[i]-SpeedrunSplitsStartTime(SpeedrunSplitsPBCopy[1]))
 					if not SpeedrunSplitsOptions["Colour"] then
 						if SpeedrunSplitsDeltaTime < 0 then
 							SpeedrunSplitsDiffColor = "|cff00aa00"
@@ -623,6 +658,7 @@ function SpeedrunSplitsInitialise()
 	panel.DeltaCheckButton:SetChecked(SpeedrunSplitsOptions["Delta"])
 	panel.NextCheckButton:SetChecked(SpeedrunSplitsOptions["Next"])
 	panel.ColourCheckButton:SetChecked(SpeedrunSplitsOptions["Colour"])
+	panel.TimingCheckButton:SetChecked(SpeedrunSplitsOptions["Timing"])
 
 	_G["SpeedrunSplitsFontSliderText"]:SetText("Font Size ("..SpeedrunSplitsOptions["FontSize"]..")");
 	_G["SpeedrunSplitsRangeSliderText"]:SetText("Level Range ("..SpeedrunSplitsOptions["LevelRange"]..")");
