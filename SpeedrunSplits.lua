@@ -496,6 +496,8 @@ function SpeedrunSplitsStartTime(time)
 end
 
 function SpeedrunSplitsGenerate()
+	local startTime = SpeedrunSplitsStartTime(SpeedrunSplits[1])
+	local startTimePB = SpeedrunSplitsStartTime(SpeedrunSplitsPBCopy[1])
 	if SpeedrunSplitsMax > 1 then
 		local SpeedrunSplitsText = ""
 		local SpeedrunSplitsSplitTime = ""
@@ -507,7 +509,7 @@ function SpeedrunSplitsGenerate()
 			end
 			SpeedrunSplitsText = SpeedrunSplitsText.."Level "..i
 			if i <= SpeedrunSplitsLevel and SpeedrunSplitsPBCopy[i] and SpeedrunSplits[i] then
-				local SpeedrunSplitsDiff = (SpeedrunSplits[i]-SpeedrunSplitsStartTime(SpeedrunSplits[1]))-(SpeedrunSplitsPBCopy[i]-SpeedrunSplitsStartTime(SpeedrunSplitsPBCopy[1]))
+				local SpeedrunSplitsDiff = (SpeedrunSplits[i]-startTime)-(SpeedrunSplitsPBCopy[i]-startTimePB)
 				if not SpeedrunSplitsOptions["Colour"] then
 					if SpeedrunSplitsDiff < 0 then
 						SpeedrunSplitsDiffColor = "|cff00aa00"
@@ -520,9 +522,9 @@ function SpeedrunSplitsGenerate()
 						end
 					end
 				end
-				SpeedrunSplitsSplitTime = SpeedrunSplitsSplitTime..SpeedrunSplitsDiffColor..SpeedrunSplitsTime(SpeedrunSplits[i]-SpeedrunSplitsStartTime(SpeedrunSplits[1])).."|r"
+				SpeedrunSplitsSplitTime = SpeedrunSplitsSplitTime..SpeedrunSplitsDiffColor..SpeedrunSplitsTime(SpeedrunSplits[i]-startTime).."|r"
 			elseif SpeedrunSplitsPBCopy[i] then
-				SpeedrunSplitsSplitTime = SpeedrunSplitsSplitTime..SpeedrunSplitsTime(SpeedrunSplitsPBCopy[i]-SpeedrunSplitsStartTime(SpeedrunSplitsPBCopy[1]))
+				SpeedrunSplitsSplitTime = SpeedrunSplitsSplitTime..SpeedrunSplitsTime(SpeedrunSplitsPBCopy[i]-startTimePB)
 			end
 		end
 
@@ -534,14 +536,16 @@ function SpeedrunSplitsGenerate()
 end
 
 function SpeedrunSplitsGenerateDelta()
+	local startTime = SpeedrunSplitsStartTime(SpeedrunSplits[1])
+	local startTimePB = SpeedrunSplitsStartTime(SpeedrunSplitsPBCopy[1])
 	if not SpeedrunSplitsOptions["Delta"] or SpeedrunSplitsMax > 1 then
 		local SpeedrunSplitsDiffColor = "|cffffffff"
 		local SpeedrunSplitsDeltaTime = 0
 		local SpeedrunSplitsDelta = ""
 		if SpeedrunSplitsLevel < 60 and SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] and not SpeedrunSplitsOptions["Next"] then
-			if SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] - SpeedrunSplitsStartTime(SpeedrunSplitsPBCopy[1]) - SpeedrunSplitsDeltaDiff < SpeedrunSplitsTotalTime - SpeedrunSplitsStartTime(SpeedrunSplits[1]) or SpeedrunSplitsXPWindow then
+			if SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] - startTimePB - SpeedrunSplitsDeltaDiff < SpeedrunSplitsTotalTime - startTime or SpeedrunSplitsXPWindow then
 				SpeedrunSplitsDeltaUpdate = true
-				SpeedrunSplitsDeltaTime = SpeedrunSplitsTotalTime - SpeedrunSplitsStartTime(SpeedrunSplits[1]) - (SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] - SpeedrunSplitsStartTime(SpeedrunSplitsPBCopy[1]))
+				SpeedrunSplitsDeltaTime = SpeedrunSplitsTotalTime - startTime - (SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] - startTimePB)
 				if not SpeedrunSplitsOptions["Colour"] then
 					if SpeedrunSplitsDeltaTime < 0 then
 						SpeedrunSplitsDiffColor = "|cff00aa00"
@@ -556,7 +560,7 @@ function SpeedrunSplitsGenerateDelta()
 		if SpeedrunSplitsDeltaUpdate then
 			for i=SpeedrunSplitsLevel,SpeedrunSplitsMin,-1 do
 				if SpeedrunSplits[i] and SpeedrunSplitsPBCopy[i] then
-					SpeedrunSplitsDeltaTime = SpeedrunSplits[i]-SpeedrunSplitsStartTime(SpeedrunSplits[1])-(SpeedrunSplitsPBCopy[i]-SpeedrunSplitsStartTime(SpeedrunSplitsPBCopy[1]))
+					SpeedrunSplitsDeltaTime = SpeedrunSplits[i]-startTime-(SpeedrunSplitsPBCopy[i]-startTimePB)
 					if not SpeedrunSplitsOptions["Colour"] then
 						if SpeedrunSplitsDeltaTime < 0 then
 							SpeedrunSplitsDiffColor = "|cff00aa00"
