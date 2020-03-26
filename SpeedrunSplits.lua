@@ -589,7 +589,7 @@ function SpeedrunSplitsGenerateDelta()
 end
 
 function SpeedrunSplitsSave()
-	for i=2,SpeedrunSplitsLevel do
+	for i=1,SpeedrunSplitsLevel do
 		if SpeedrunSplits[i] then
 			SpeedrunSplitsPB[SpeedrunSplitsRaceID][SpeedrunSplitsClassID][i] = SpeedrunSplits[i]
 		end
