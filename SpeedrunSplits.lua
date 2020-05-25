@@ -55,10 +55,6 @@ f.text:SetPoint("TOPLEFT",0,0)
 f.text:SetJustifyH("LEFT")
 f.text:SetJustifyV("TOP")
 
-f.timer = f:CreateFontString(nil,"ARTWORK") 
-f.timer:SetPoint("TOPLEFT",f.text,"BOTTOMLEFT",0,-5)
-f.timer:SetJustifyH("LEFT")
-f.timer:SetJustifyV("TOP")
 
 f.delta = f:CreateFontString(nil,"ARTWORK") 
 f.delta:SetPoint("TOPLEFT",f.text,"TOPRIGHT",5,0)
@@ -69,6 +65,17 @@ f.times = f:CreateFontString(nil,"ARTWORK")
 f.times:SetPoint("TOPLEFT",f.delta,"TOPRIGHT",5,0)
 f.times:SetJustifyH("LEFT")
 f.times:SetJustifyV("TOP")
+
+f.timer = f:CreateFontString(nil,"ARTWORK") 
+f.timer:SetPoint("TOPLEFT",f.times,"BOTTOMLEFT",0,-5)
+f.timer:SetJustifyH("LEFT")
+f.timer:SetJustifyV("TOP")
+
+f.timerDescription = f:CreateFontString(nil,"ARTWORK") 
+f.timerDescription:SetPoint("TOPLEFT",f.text,"BOTTOMLEFT",0,-5)
+f.timerDescription:SetJustifyH("LEFT")
+f.timerDescription:SetJustifyV("TOP")
+
 
 local panel = CreateFrame("Frame")
 panel.name = NAME
@@ -219,6 +226,7 @@ function f:OnEvent(event, arg1, arg2)
 			_G["SpeedrunSplitsFontSliderText"]:SetText("Font Size ("..newvalue..")");
 			panel.FontSlider:SetValue(newvalue)
 			f.timer:SetFont(SpeedrunSplitsFont, newvalue, "OUTLINE")
+			f.timerDescription:SetFont(SpeedrunSplitsFont, newvalue, "OUTLINE")
 			f.text:SetFont(SpeedrunSplitsFont, newvalue, "OUTLINE")
 			f.delta:SetFont(SpeedrunSplitsFont, newvalue, "OUTLINE")
 			f.times:SetFont(SpeedrunSplitsFont, newvalue, "OUTLINE")
@@ -530,7 +538,7 @@ function SpeedrunSplitsGenerate()
 
 		f.text:SetText(SpeedrunSplitsText)
 		f.times:SetText(SpeedrunSplitsSplitTime)
-		
+		f.timerDescription:SetText("/played\nThis level")
 		f.times:SetWidth(f.times:GetStringWidth()+1)
 	end
 end
@@ -650,6 +658,7 @@ function SpeedrunSplitsInitialise()
 
 	f.text:SetFont(SpeedrunSplitsFont, SpeedrunSplitsOptions["FontSize"], "OUTLINE")
 	f.timer:SetFont(SpeedrunSplitsFont, SpeedrunSplitsOptions["FontSize"], "OUTLINE")
+	f.timerDescription:SetFont(SpeedrunSplitsFont, SpeedrunSplitsOptions["FontSize"], "OUTLINE")
 	f.delta:SetFont(SpeedrunSplitsFont, SpeedrunSplitsOptions["FontSize"], "OUTLINE")
 	f.times:SetFont(SpeedrunSplitsFont, SpeedrunSplitsOptions["FontSize"], "OUTLINE")
 
