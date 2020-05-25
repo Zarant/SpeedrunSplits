@@ -67,7 +67,7 @@ f.times:SetJustifyH("LEFT")
 f.times:SetJustifyV("TOP")
 
 f.timer = f:CreateFontString(nil,"ARTWORK") 
-f.timer:SetPoint("TOPLEFT",f.times,"BOTTOMLEFT",0,-5)
+f.timer:SetPoint("TOPLEFT",f.delta,"BOTTOMLEFT",0,-5)
 f.timer:SetJustifyH("LEFT")
 f.timer:SetJustifyV("TOP")
 
@@ -538,7 +538,7 @@ function SpeedrunSplitsGenerate()
 
 		f.text:SetText(SpeedrunSplitsText)
 		f.times:SetText(SpeedrunSplitsSplitTime)
-		f.timerDescription:SetText("/played\nThis level")
+		f.timerDescription:SetText("\n/played\nThis level")
 		f.times:SetWidth(f.times:GetStringWidth()+1)
 	end
 end
