@@ -66,16 +66,16 @@ f.times:SetPoint("TOPLEFT",f.delta,"TOPRIGHT",5,0)
 f.times:SetJustifyH("LEFT")
 f.times:SetJustifyV("TOP")
 
-f.timer = f:CreateFontString(nil,"ARTWORK") 
-f.timer:SetPoint("TOPLEFT",f.delta,"BOTTOMLEFT",0,-5)
-f.timer:SetJustifyH("LEFT")
-f.timer:SetJustifyV("TOP")
 
 f.timerDescription = f:CreateFontString(nil,"ARTWORK") 
 f.timerDescription:SetPoint("TOPLEFT",f.text,"BOTTOMLEFT",0,-5)
 f.timerDescription:SetJustifyH("LEFT")
 f.timerDescription:SetJustifyV("TOP")
 
+f.timer = f:CreateFontString(nil,"ARTWORK") --/plyaed text
+f.timer:SetPoint("TOPLEFT",f.timerDescription,"TOPRIGHT",0,0)
+f.timer:SetJustifyH("LEFT")
+f.timer:SetJustifyV("TOP")
 
 local panel = CreateFrame("Frame")
 panel.name = NAME
@@ -538,7 +538,7 @@ function SpeedrunSplitsGenerate()
 
 		f.text:SetText(SpeedrunSplitsText)
 		f.times:SetText(SpeedrunSplitsSplitTime)
-		f.timerDescription:SetText("\n/played\nThis level")
+		f.timerDescription:SetText("/played\nThis level")
 		f.times:SetWidth(f.times:GetStringWidth()+1)
 	end
 end
@@ -595,6 +595,7 @@ function SpeedrunSplitsGenerateDelta()
 		end
 	end
 end
+--local _,r = UnitRace("player") local _,c = UnitClass("player") for i=1,60 do if SpeedrunSplits[i] then SpeedrunSplitsPB[r][c][i] = SpeedrunSplits[i] end end
 
 function SpeedrunSplitsSave()
 	for i=1,SpeedrunSplitsLevel do
