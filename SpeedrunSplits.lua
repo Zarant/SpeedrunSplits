@@ -25,6 +25,13 @@ local xpos2 = 0
 local ypos2 = 0
 local xpos3 = 0
 local ypos3 = 0
+local version = select(4, GetBuildInfo())
+
+if version > 20500 then
+	SpeedrunSplitsMaxLevel = 70
+else
+	SpeedrunSplitsMaxLevel = 60
+end
 
 --/run SpeedrunSplitsPB["NightElf"]["HUNTER"][2]=100
 
@@ -113,9 +120,9 @@ panel.PBSlider = CreateFrame("Slider", "SpeedrunSplitsPBSlider", panel, "Options
 panel.PBSlider:SetOrientation('HORIZONTAL')
 panel.PBSlider.tooltipText = 'The level for SpeedrunSplits to automatically save character times upon reaching with a time faster than previously set'
 _G["SpeedrunSplitsPBSliderLow"]:SetText("5");
-_G["SpeedrunSplitsPBSliderHigh"]:SetText("60");
+_G["SpeedrunSplitsPBSliderHigh"]:SetText(tostring(SpeedrunSplitsMaxLevel));
 panel.PBSlider:SetPoint("TOPLEFT", panel.RangeSlider, "TOPRIGHT", 20, 0)
-panel.PBSlider:SetMinMaxValues(5,60)
+panel.PBSlider:SetMinMaxValues(5,SpeedrunSplitsMaxLevel)
 panel.PBSlider:SetValueStep(1)
 panel.PBSlider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
 
@@ -390,7 +397,7 @@ function f:OnEvent(event, arg1, arg2)
 
 		SpeedrunSplitsGenerateAll()
 
-		if (SpeedrunSplitsOptions["PBLevel"] == SpeedrunSplitsLevel or SpeedrunSplitsLevel == 60) and SpeedrunSplitsLevelUp == true and SpeedrunSplits[SpeedrunSplitsLevel] < SpeedrunSplitsPB[SpeedrunSplitsRaceID][SpeedrunSplitsClassID][SpeedrunSplitsLevel] then
+		if (SpeedrunSplitsOptions["PBLevel"] == SpeedrunSplitsLevel or SpeedrunSplitsLevel == SpeedrunSplitsMaxLevel) and SpeedrunSplitsLevelUp == true and SpeedrunSplits[SpeedrunSplitsLevel] < SpeedrunSplitsPB[SpeedrunSplitsRaceID][SpeedrunSplitsClassID][SpeedrunSplitsLevel] then
 			print("[SpeedrunSplits] CONGRATULATIONS! You've beat your previous level", SpeedrunSplitsLevel, "time by", SpeedrunSplitsTime(SpeedrunSplitsPB[SpeedrunSplitsRaceID][SpeedrunSplitsClassID][SpeedrunSplitsLevel]-SpeedrunSplits[SpeedrunSplitsLevel]), "! Your current times have been recorded to be compared against for future runs.")
 			SpeedrunSplitsSave()
 		end
@@ -550,7 +557,7 @@ function SpeedrunSplitsGenerateDelta()
 		local SpeedrunSplitsDiffColor = "|cffffffff"
 		local SpeedrunSplitsDeltaTime = 0
 		local SpeedrunSplitsDelta = ""
-		if SpeedrunSplitsLevel < 60 and SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] and not SpeedrunSplitsOptions["Next"] then
+		if SpeedrunSplitsLevel < SpeedrunSplitsMaxLevel and SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] and not SpeedrunSplitsOptions["Next"] then
 			if SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] - startTimePB - SpeedrunSplitsDeltaDiff < SpeedrunSplitsTotalTime - startTime or SpeedrunSplitsXPWindow then
 				SpeedrunSplitsDeltaUpdate = true
 				SpeedrunSplitsDeltaTime = SpeedrunSplitsTotalTime - startTime - (SpeedrunSplitsPBCopy[SpeedrunSplitsLevel+1] - startTimePB)
@@ -631,8 +638,8 @@ function SpeedrunSplitsRange(range, level)
 		end
 	else
 		SpeedrunSplitsMax = level + 1
-		if SpeedrunSplitsMax > 60 then
-			SpeedrunSplitsMax = 60
+		if SpeedrunSplitsMax > SpeedrunSplitsMaxLevel then
+			SpeedrunSplitsMax = SpeedrunSplitsMaxLevel
 		elseif SpeedrunSplitsMax < range + 1 then
 			SpeedrunSplitsMax = range + 1
 		end
