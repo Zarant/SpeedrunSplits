@@ -27,7 +27,9 @@ local xpos3 = 0
 local ypos3 = 0
 local version = select(4, GetBuildInfo())
 
-if version > 20500 then
+if version > 30000 then
+	SpeedrunSplitsMaxLevel = 80
+elseif version > 20500 then
 	SpeedrunSplitsMaxLevel = 70
 else
 	SpeedrunSplitsMaxLevel = 60
