@@ -27,9 +27,7 @@ local xpos3 = 0
 local ypos3 = 0
 local version = select(4, GetBuildInfo())
 
-if version > 30000 then
-	SpeedrunSplitsMaxLevel = 80
-elseif version > 20500 then
+if version > 20500 then
 	SpeedrunSplitsMaxLevel = 70
 else
 	SpeedrunSplitsMaxLevel = 60
@@ -38,18 +36,17 @@ end
 --/run SpeedrunSplitsPB["NightElf"]["HUNTER"][2]=100
 
 function SpeedrunSplitsDefaults()
-	SpeedrunSplitsOptions["xpos"] = 5
-	SpeedrunSplitsOptions["ypos"] = -120
-	SpeedrunSplitsOptions["PBLevel"] = 40
-	SpeedrunSplitsOptions["LevelRange"] = 9
-	SpeedrunSplitsOptions["FontSize"] = 13
-	SpeedrunSplitsOptions["Show"] = true
-	SpeedrunSplitsOptions["Move"] = false
-	SpeedrunSplitsOptions["Days"] = false
-	SpeedrunSplitsOptions["Delta"] = false
-	SpeedrunSplitsOptions["Next"] = false
-	SpeedrunSplitsOptions["Colour"] = false
-	SpeedrunSplitsOptions["Timing"] = false
+	SpeedrunSplitsOptions.anchor = SpeedrunSplitsOptions.anchor or {"TOPLEFT",false,"TOPLEFT",5,-120}
+	SpeedrunSplitsOptions["PBLevel"] = SpeedrunSplitsOptions["PBLevel"] or 40
+	SpeedrunSplitsOptions["LevelRange"] = SpeedrunSplitsOptions["LevelRange"] or 9
+	SpeedrunSplitsOptions["FontSize"] = SpeedrunSplitsOptions["FontSize"] or 13
+	SpeedrunSplitsOptions["Show"] = SpeedrunSplitsOptions["Show"] or true
+	SpeedrunSplitsOptions["Move"] = SpeedrunSplitsOptions["Move"] or false
+	SpeedrunSplitsOptions["Days"] = SpeedrunSplitsOptions["Days"] or false
+	SpeedrunSplitsOptions["Delta"] = SpeedrunSplitsOptions["Delta"] or false
+	SpeedrunSplitsOptions["Next"] = SpeedrunSplitsOptions["Next"] or false
+	SpeedrunSplitsOptions["Colour"] = SpeedrunSplitsOptions["Colour"] or false
+	SpeedrunSplitsOptions["Timing"] = SpeedrunSplitsOptions["Timing"] or false
 end
 
 local NAME, S = ...
@@ -199,11 +196,9 @@ function f:OnEvent(event, arg1, arg2)
 		if SpeedrunSplitsGold == nil then
 			SpeedrunSplitsGold = {}
 		end
-		if SpeedrunSplitsOptions == nil or SpeedrunSplitsOptions["xpos"] == nil or	SpeedrunSplitsOptions["ypos"] == nil or SpeedrunSplitsOptions["PBLevel"] == nil or SpeedrunSplitsOptions["LevelRange"] == nil or SpeedrunSplitsOptions["FontSize"] == nil or SpeedrunSplitsOptions["Show"] == nil then
-			SpeedrunSplitsOptions = {}
-			SpeedrunSplitsDefaults()
-		end
-		
+		SpeedrunSplitsOptions = SpeedrunSplitsOptions or {}
+		SpeedrunSplitsDefaults()
+			
 		f:SetScript("OnMouseDown", function(self, button)
 			if button == "LeftButton" and not self.isMoving and SpeedrunSplitsOptions["Move"] then
 				_, _, _, xpos1, ypos1 = f:GetPoint(1)
@@ -214,12 +209,10 @@ function f:OnEvent(event, arg1, arg2)
 		end)
 		f:SetScript("OnMouseUp", function(self, button)
 			if button == "LeftButton" and self.isMoving and SpeedrunSplitsOptions["Move"] then
-				_, _, _, xpos3, ypos3 = f:GetPoint(1)
 				self:StopMovingOrSizing()
+				SpeedrunSplitsOptions.anchor = {f:GetPoint(1)}
+				SpeedrunSplitsOptions.anchor[2] = false
 				self.isMoving = false;
-				SpeedrunSplitsOptions["xpos"] = xpos1 + xpos3 - xpos2
-				SpeedrunSplitsOptions["ypos"] = ypos1 + ypos3 - ypos2
-				self:SetPoint("TOPLEFT",SpeedrunSplitsOptions["xpos"],SpeedrunSplitsOptions["ypos"])
 			end
 		end)
 		f:SetScript("OnHide", function(self)
@@ -421,7 +414,8 @@ function f:OnUpdate(arg1)
 		SpeedrunSplitsLevelTime = SpeedrunSplitsLevelTime + SpeedrunSplits_UpdateInterval
 
 		SpeedrunSplitsGenerateDelta()
-		
+		f:SetWidth(f.text:GetStringWidth()+f.delta:GetWidth()+f.times:GetWidth()+10) 
+		f:EnableMouse(SpeedrunSplitsOptions.Move)
 		if SpeedrunSplitsTotalTime > 0 then
 			if SpeedrunSplitsOptions["Timing"] and SpeedrunSplits[1] > 0 then
 				f.timer:SetText(SpeedrunSplitsTime(SpeedrunSplitsTotalTime-SpeedrunSplits[1]).." (+"..SpeedrunSplitsTime(SpeedrunSplits[1])..")".."\n"..SpeedrunSplitsTime(SpeedrunSplitsLevelTime))
@@ -502,6 +496,8 @@ function SpeedrunSplitsGenerateAll()
 	SpeedrunSplitsDeltaUpdate = true
 	SpeedrunSplitsGenerate()
 	SpeedrunSplitsGenerateDelta()
+	f:SetWidth(f.text:GetStringWidth()+f.delta:GetWidth()+f.times:GetWidth()+10) 
+	f:SetHeight(f.text:GetStringHeight()+f.timer:GetStringHeight()+f.timerDescription:GetStringHeight() + 5)
 end
 
 function SpeedrunSplitsStartTime(time)
@@ -650,7 +646,10 @@ function SpeedrunSplitsRange(range, level)
 end
 
 function SpeedrunSplitsInitialise()
-	f:SetPoint("TOPLEFT",SpeedrunSplitsOptions["xpos"],SpeedrunSplitsOptions["ypos"])
+	f:ClearAllPoints()
+	f:SetClampedToScreen(true)
+	local a1,_,a3,a4,a5 = unpack(SpeedrunSplitsOptions.anchor)
+	f:SetPoint(a1,UIParent,a3,a4,a5)
 
 	if SpeedrunSplitsOptions["Show"] then
 		f:Show()
